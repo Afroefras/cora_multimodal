@@ -1,7 +1,7 @@
 from pathlib import Path
 from wfdb import processing, rdrecord, plot_wfdb
 
-from torch import Tensor, stack, cat
+from torch import Tensor, stack, cat, save as torch_save
 
 
 class ExtractData:
@@ -14,23 +14,21 @@ class ExtractData:
         record = record.unsqueeze(0)
         return record
 
-    def read_records_dir(
-        self, dir: str, verbose: bool = False, test: bool = False
-    ) -> None:
-        dir = Path(dir)
-        files_list = dir.glob("*[!.html]")
+    def read_records_dir(self, import_dir: str, verbose: bool, test: bool = False) -> None:
+        import_dir = Path(import_dir)
+        files_list = import_dir.glob("*[!.html]")
         unique_filenames = set(map(lambda x: x.stem, files_list))
 
         self.raw_records = []
         for i, filename in enumerate(unique_filenames):
-            file_dir = dir.joinpath(filename)
+            file_dir = import_dir.joinpath(filename)
             record = self.read_record(file_dir)
             self.raw_records.append(record)
 
             if verbose:
                 print(f"#{i+1}: {filename} imported")
 
-            if test and i > 20:
+            if test and i > 7:
                 break
 
     def same_shape(self, verbose: bool) -> None:
@@ -56,13 +54,33 @@ class ExtractData:
             if verbose:
                 print(f"#{i+1}: {shape_before} --> {record.shape}")
 
+    def save_records(self, dir_to_save: str, verbose: bool) -> None:
+        dir_to_save = Path(dir_to_save)
+        dir_to_save = dir_to_save.joinpath("tensors")
+        dir_to_save.mkdir(exist_ok=True)
+
+        to_save = dir_to_save.joinpath("records.pt")
+
+        torch_save(self.records, to_save)
+
+        if verbose:
+            print(f"\nTensor 'records.pt' is now saved at:\n{dir_to_save}")
+
+    def extract_n_export(self, import_dir: str, export_dir: str, verbose: bool=False) -> None:
+        self.read_records_dir(import_dir, verbose, test=True)
+        self.same_shape(verbose)
+        self.save_records(export_dir, verbose)
+
+
 
 ed = ExtractData()
 
-DIR = "data/physionet.org/files/ephnogram/1.0.0/WFDB"
-ed.read_records_dir(DIR, verbose=True, test=True)
-
-ed.same_shape(verbose=True)
+IMPORT_DIR = "data/physionet.org/files/ephnogram/1.0.0/WFDB"
+ed.extract_n_export(
+    import_dir=IMPORT_DIR,
+    export_dir='data',
+    verbose=True
+)
 
 # qrs_inds = processing.qrs.gqrs_detect(sig=record.p_signal[:, 0], fs=record.fs)
 # print('\nGQRS detect: ', qrs_inds)
