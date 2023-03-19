@@ -1,6 +1,5 @@
 from pathlib import Path
-from wfdb import processing, rdrecord, plot_wfdb
-
+from wfdb import rdrecord
 from torch import Tensor, stack, cat, save as torch_save
 
 
@@ -14,7 +13,9 @@ class ExtractData:
         record = record.unsqueeze(0)
         return record
 
-    def read_records_dir(self, import_dir: str, verbose: bool, test: bool = False) -> None:
+    def read_records_dir(
+        self, import_dir: str, verbose: bool, test: bool = False
+    ) -> None:
         import_dir = Path(import_dir)
         files_list = import_dir.glob("*[!.html]")
         unique_filenames = set(map(lambda x: x.stem, files_list))
@@ -66,22 +67,9 @@ class ExtractData:
         if verbose:
             print(f"\nTensor 'records.pt' is now saved at:\n{dir_to_save}")
 
-    def extract_n_export(self, import_dir: str, export_dir: str, verbose: bool=False) -> None:
-        self.read_records_dir(import_dir, verbose, test=True)
+    def extract_n_export(
+        self, import_dir: str, export_dir: str, verbose: bool = False
+    ) -> None:
+        self.read_records_dir(import_dir, verbose)
         self.same_shape(verbose)
         self.save_records(export_dir, verbose)
-
-
-
-ed = ExtractData()
-
-IMPORT_DIR = "data/physionet.org/files/ephnogram/1.0.0/WFDB"
-ed.extract_n_export(
-    import_dir=IMPORT_DIR,
-    export_dir='data',
-    verbose=True
-)
-
-# qrs_inds = processing.qrs.gqrs_detect(sig=record.p_signal[:, 0], fs=record.fs)
-# print('\nGQRS detect: ', qrs_inds)
-# plot_wfdb(record=record)
