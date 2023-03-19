@@ -17,3 +17,6 @@ Min shape: (240000, 2)
 
 Tensor 'records.pt' is now saved at:
 data/tensors
+
+Citations:
+Kazemnejad, A., Gordany, P., & Sameni, R. (2021). EPHNOGRAM: A Simultaneous Electrocardiogram and Phonocardiogram Database (version 1.0.0). PhysioNet. https://doi.org/10.13026/tjtq-5911.
