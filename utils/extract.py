@@ -1,5 +1,6 @@
 from pathlib import Path
 from wfdb import rdrecord
+from pandas import read_csv
 from torch import Tensor, stack, cat, save as torch_save
 
 
@@ -13,15 +14,41 @@ class ExtractData:
         record = record.unsqueeze(0)
         return record
 
+    def filter_records(
+        self,
+        notes_file_dir: str,
+        record_id_col: str,
+        ecg_col: str,
+        ecg_cotains: str,
+        pcg_col: str,
+        pcg_cotains: str,
+        verbose: bool = False,
+    ) -> None:
+        df = read_csv(notes_file_dir)
+        df = df[
+            (df[ecg_col].str.contains(ecg_cotains))
+            & (df[pcg_col].str.contains(pcg_cotains))
+        ].copy()
+
+        self.filtered = set(df[record_id_col])
+
+        if verbose:
+            print(f"\n{len(self.filtered)} records filtered from:")
+            print(f"\t{notes_file_dir}")
+            print(f"where {ecg_col} column contains '{ecg_cotains}'")
+            print(f"and {pcg_col} column contains '{pcg_cotains}'\n")
+
     def read_records_dir(
-        self, import_dir: str, verbose: bool, test: bool = False
+        self, import_dir: str, verbose: bool, test: bool = True
     ) -> None:
         import_dir = Path(import_dir)
         files_list = import_dir.glob("*[!.html]")
         unique_filenames = set(map(lambda x: x.stem, files_list))
 
+        valid_filenames = unique_filenames.intersection(self.filtered)
+
         self.raw_records = []
-        for i, filename in enumerate(unique_filenames):
+        for i, filename in enumerate(valid_filenames):
             file_dir = import_dir.joinpath(filename)
             record = self.read_record(file_dir)
             self.raw_records.append(record)
