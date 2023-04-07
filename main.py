@@ -1,4 +1,6 @@
+from torch import load as torch_load
 from utils.extract import ExtractData
+from utils.transform import split_records, save_records
 
 ed = ExtractData()
 
@@ -16,6 +18,17 @@ ed.filter_records(
 
 ed.extract_n_export(
     import_dir="data/physionet.org/files/ephnogram/1.0.0/WFDB",
-    export_dir="data",
+    export_dir="data/tensors",
+    export_name="raw_records",
+    verbose=True,
+)
+
+raw_records = torch_load("data/tensors/raw_records.pt")
+
+resized = split_records(raw_records, seconds=3, verbose=True)
+save_records(
+    records=resized,
+    export_dir="data/tensors",
+    export_name="resized_records",
     verbose=True,
 )

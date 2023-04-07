@@ -1,7 +1,8 @@
 from pathlib import Path
 from wfdb import rdrecord
 from pandas import read_csv
-from torch import Tensor, stack, cat, save as torch_save
+from torch import Tensor, stack, cat
+from utils.transform import save_records
 
 
 class ExtractData:
@@ -25,21 +26,21 @@ class ExtractData:
         verbose: bool = False,
     ) -> None:
         df = read_csv(notes_file_dir)
-        df = df[
+        self.filtered = df[
             (df[ecg_col].str.contains(ecg_cotains))
             & (df[pcg_col].str.contains(pcg_cotains))
         ].copy()
 
-        self.filtered = set(df[record_id_col])
+        self.filtered = set(self.filtered[record_id_col])
 
         if verbose:
-            print(f"\n{len(self.filtered)} records filtered from:")
+            print(f"\n{len(self.filtered)}/{len(df)} records filtered from:")
             print(f"\t{notes_file_dir}")
             print(f"where {ecg_col} column contains '{ecg_cotains}'")
             print(f"and {pcg_col} column contains '{pcg_cotains}'\n")
 
     def read_records_dir(
-        self, import_dir: str, verbose: bool, test: bool = True
+        self, import_dir: str, verbose: bool, test: bool = False
     ) -> None:
         import_dir = Path(import_dir)
         files_list = import_dir.glob("*[!.html]")
@@ -82,21 +83,9 @@ class ExtractData:
             if verbose:
                 print(f"#{i+1}: {shape_before} --> {record.shape}")
 
-    def save_records(self, dir_to_save: str, verbose: bool) -> None:
-        dir_to_save = Path(dir_to_save)
-        dir_to_save = dir_to_save.joinpath("tensors")
-        dir_to_save.mkdir(exist_ok=True)
-
-        to_save = dir_to_save.joinpath("records.pt")
-
-        torch_save(self.records, to_save)
-
-        if verbose:
-            print(f"\nTensor 'records.pt' is now saved at:\n{dir_to_save}")
-
     def extract_n_export(
-        self, import_dir: str, export_dir: str, verbose: bool = False
+        self, import_dir: str, export_dir: str, export_name, verbose: bool
     ) -> None:
         self.read_records_dir(import_dir, verbose)
         self.same_shape(verbose)
-        self.save_records(export_dir, verbose)
+        save_records(self.records, export_dir, export_name, verbose)
