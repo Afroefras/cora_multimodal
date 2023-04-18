@@ -3,7 +3,7 @@ from torch import Tensor, stack, save as torch_save
 
 
 def split_records(records: Tensor, seconds: int, verbose: bool) -> Tensor:
-    new_duration = records.shape[1] // seconds
+    new_duration = 8000 // seconds
     seconds *= 8000
 
     to_stack = records.split(seconds, dim=1)

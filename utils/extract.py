@@ -2,18 +2,11 @@ from pathlib import Path
 from wfdb import rdrecord
 from pandas import read_csv
 from torch import Tensor, stack, cat
-from utils.transform import save_records
 
 
 class ExtractData:
     def __init__(self) -> None:
         pass
-
-    def read_record(self, file_dir: str) -> list:
-        record = rdrecord(file_dir)
-        record = Tensor(record.p_signal)
-        record = record.unsqueeze(0)
-        return record
 
     def filter_records(
         self,
@@ -35,10 +28,17 @@ class ExtractData:
 
         if verbose:
             print(f"\n{len(self.filtered)}/{len(df)} records filtered from:")
-            print(f"\t{notes_file_dir}")
+            print(f"\t'{notes_file_dir}'")
             print(f"where {ecg_col} column contains '{ecg_cotains}'")
             print(f"and {pcg_col} column contains '{pcg_cotains}'\n")
 
+    def read_record(self, file_dir: Path) -> list:
+        record_name = file_dir.stem
+        record = rdrecord(file_dir)
+        record = Tensor(record.p_signal)
+        record = record.unsqueeze(0)
+        return record, record_name
+    
     def read_records_dir(
         self, import_dir: str, verbose: bool, test: bool = False
     ) -> None:
@@ -49,10 +49,14 @@ class ExtractData:
         valid_filenames = unique_filenames.intersection(self.filtered)
 
         self.raw_records = []
+        self.raw_records_names = []
+
         for i, filename in enumerate(valid_filenames):
             file_dir = import_dir.joinpath(filename)
-            record = self.read_record(file_dir)
+            record, record_name = self.read_record(file_dir)
+
             self.raw_records.append(record)
+            self.raw_records_names.append(record_name)
 
             if verbose:
                 print(f"#{i+1}: {filename} imported")
@@ -68,6 +72,8 @@ class ExtractData:
             print(f"\nMin shape: {min_shape1, min_shape2}")
 
         self.records = Tensor()
+        self.records_names = []
+
         for i, record in enumerate(self.raw_records):
             shape_before = record.shape
 
@@ -80,12 +86,8 @@ class ExtractData:
 
             self.records = cat((self.records, record))
 
+            to_append = [self.raw_records_names[i]] * record.shape[0]
+            self.records_names.extend(to_append)
+
             if verbose:
                 print(f"#{i+1}: {shape_before} --> {record.shape}")
-
-    def extract_n_export(
-        self, import_dir: str, export_dir: str, export_name, verbose: bool
-    ) -> None:
-        self.read_records_dir(import_dir, verbose)
-        self.same_shape(verbose)
-        save_records(self.records, export_dir, export_name, verbose)
