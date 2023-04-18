@@ -38,7 +38,7 @@ class ExtractData:
         record = Tensor(record.p_signal)
         record = record.unsqueeze(0)
         return record, record_name
-    
+
     def read_records_dir(
         self, import_dir: str, verbose: bool, test: bool = False
     ) -> None:

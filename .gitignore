@@ -8,3 +8,4 @@ data/physionet.org/files/ephnogram/1.0.0/ECGPCGSpreadsheet.csv
 *.hea
 *.pt
 *.pyc
+*.xz

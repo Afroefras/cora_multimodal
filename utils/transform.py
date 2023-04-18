@@ -1,8 +1,11 @@
+from numpy import repeat
 from pathlib import Path
 from torch import Tensor, stack, save as torch_save
 
 
-def split_records(records: Tensor, seconds: int, verbose: bool) -> Tensor:
+def split_records(
+    records: Tensor, records_names: list, seconds: int, verbose: bool
+) -> Tensor:
     new_duration = 8000 // seconds
     seconds *= 8000
 
@@ -11,10 +14,14 @@ def split_records(records: Tensor, seconds: int, verbose: bool) -> Tensor:
 
     resized = to_reshape.view(-1, new_duration, 2)
 
+    times_to_repeat = records.shape[1] // new_duration
+    names_repeated = repeat(records_names, times_to_repeat)
+    names_repeated = dict(enumerate(names_repeated))
+
     if verbose:
         print(f"Before: {records.shape} --> After: {resized.shape}")
 
-    return resized
+    return resized, names_repeated
 
 
 def save_records(
