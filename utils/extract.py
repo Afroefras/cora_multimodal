@@ -13,15 +13,15 @@ class ExtractData:
         notes_file_dir: str,
         record_id_col: str,
         ecg_col: str,
-        ecg_cotains: str,
+        ecg_contains: str,
         pcg_col: str,
-        pcg_cotains: str,
+        pcg_contains: str,
         verbose: bool = False,
     ) -> None:
         df = read_csv(notes_file_dir)
         self.filtered = df[
-            (df[ecg_col].str.contains(ecg_cotains))
-            & (df[pcg_col].str.contains(pcg_cotains))
+            (df[ecg_col].str.contains(ecg_contains))
+            & (df[pcg_col].str.contains(pcg_contains))
         ].copy()
 
         self.filtered = set(self.filtered[record_id_col])
@@ -29,8 +29,8 @@ class ExtractData:
         if verbose:
             print(f"\n{len(self.filtered)}/{len(df)} records filtered from:")
             print(f"\t'{notes_file_dir}'")
-            print(f"where {ecg_col} column contains '{ecg_cotains}'")
-            print(f"and {pcg_col} column contains '{pcg_cotains}'\n")
+            print(f"where {ecg_col} column contains '{ecg_contains}'")
+            print(f"and {pcg_col} column contains '{pcg_contains}'\n")
 
     def read_record(self, file_dir: Path) -> list:
         record_name = file_dir.stem
