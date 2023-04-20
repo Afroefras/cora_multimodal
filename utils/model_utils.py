@@ -1,6 +1,6 @@
 from torch import no_grad
-from torch.nn import BCELoss
 from torch.optim import Adam
+from torch.nn import CrossEntropyLoss
 
 
 def get_accuracy(model, dataloader, device) -> float:
@@ -27,11 +27,11 @@ def train_model(
     device,
     num_epochs: int,
     lr: float,
-    print_on_batch: int = 50,
+    print_on_batch: int = 100,
 ) -> None:
     # define an optimizer and a loss function
     optim = Adam(model.parameters(), lr=lr)
-    loss_func = BCELoss()
+    loss_func = CrossEntropyLoss()
 
     for epoch in range(num_epochs):
         print(f"Epoch #{epoch + 1}")

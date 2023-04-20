@@ -1,14 +1,15 @@
 from torch import Tensor
 from pandas import read_csv
-from numpy.random import shuffle as np_shuffle
 from torch import load as torch_load
 from pickle import load as load_pickle
+from numpy.random import shuffle as np_shuffle
 from torch.utils.data import Dataset, DataLoader
 
 
 def get_sounds(records_dir: str, names_dir: str) -> tuple:
     records = torch_load(records_dir)
     sounds = records[:, :, 1:].clone()
+    sounds.squeeze_()
 
     with open(names_dir, "rb") as f:
         names = load_pickle(f)
@@ -38,6 +39,7 @@ def sound_note_contains(sound_notes: list, contains: str) -> Tensor:
         note_contains.append(to_match * 1)
 
     note_contains = Tensor(note_contains)
+    note_contains.unsqueeze_(dim=1)
     return note_contains
 
 
@@ -61,9 +63,17 @@ def train_test_split(
 
 
 class NoiseDataset(Dataset):
-    def __init__(self, sounds_tensor: Tensor, labels_list: list) -> None:
+    def __init__(
+        self,
+        sounds_tensor: Tensor,
+        labels_list: list,
+        transform=None,
+        target_transform=None,
+    ) -> None:
         self.sounds = sounds_tensor
         self.labels = labels_list
+        self.transform = transform
+        self.target_transform = target_transform
 
     def __len__(self):
         return len(self.labels)
@@ -71,10 +81,18 @@ class NoiseDataset(Dataset):
     def __getitem__(self, idx):
         sound = self.sounds[idx]
         label = self.labels[idx]
+
+        if self.transform:
+            sound = self.transform(sound)
+        if self.target_transform:
+            label = self.target_transform(label)
+
         return sound, label
 
 
-def get_data_loader(X: Tensor, y: Tensor, **kwargs) -> DataLoader:
-    dataset = NoiseDataset(X, y)
+def get_data_loader(
+    X: Tensor, y: Tensor, transform=None, target_transform=None, **kwargs
+) -> DataLoader:
+    dataset = NoiseDataset(X, y, transform, target_transform)
     data_loader = DataLoader(dataset, **kwargs)
     return data_loader
