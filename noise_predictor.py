@@ -32,11 +32,16 @@ noise_model = NoiseModel(input_size=X_train.shape[1], num_classes=1)
 device = torch_device("cuda" if cuda.is_available() else "cpu")
 noise_model = noise_model.to(device)
 
-train_model(
-    model=noise_model,
-    train_loader=train,
-    test_loader=test,
-    device=device,
-    num_epochs=3,
-    lr=0.001,
-)
+from lightning.pytorch import Trainer
+
+trainer = Trainer(limit_train_batches=100, max_epochs=1)
+trainer.fit(model=noise_model, train_dataloaders=train)
+
+# train_model(
+#     model=noise_model,
+#     train_loader=train,
+#     test_loader=test,
+#     device=device,
+#     num_epochs=3,
+#     lr=0.001,
+# )
