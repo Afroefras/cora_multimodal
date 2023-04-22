@@ -6,7 +6,7 @@ from utils.noise_utils import (
 )
 from lightning.pytorch import Trainer
 from torch import device as torch_device, cuda
-from utils.model_arquitecture import NoiseClassifier
+from utils.noise_arquitecture import NoiseClassifier
 
 sounds, names = get_sounds(
     records_dir="data/tensors/resized_records_5sec.pt",
@@ -20,15 +20,20 @@ sound_notes = get_notes(
     names=names,
 )
 labels = sound_note_contains(sound_notes, contains="Good")
-print(f"Sounds: {sounds.shape}")
-print(f"Labels: {labels.shape}\n")
 
-train, test = get_data_loaders(sounds, labels, batch_size=256, shuffle=True)
+train, test = get_data_loaders(
+    sounds,
+    labels,
+    batch_size=256,
+    num_workers=1,
+)
 
-noise_model = NoiseClassifier()
+noise_classifier = NoiseClassifier()
 device = torch_device("cuda" if cuda.is_available() else "cpu")
-noise_model = noise_model.to(device)
+noise_classifier = noise_classifier.to(device)
 
 
 trainer = Trainer(limit_train_batches=100, max_epochs=1)
-trainer.fit(model=noise_model, train_dataloaders=train)
+
+if __name__=="__main__":
+    trainer.fit(model=noise_classifier, train_dataloaders=train, val_dataloaders=test)

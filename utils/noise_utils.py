@@ -97,9 +97,9 @@ def get_data_loaders(
     X_train, y_train, X_test, y_test = train_test_split(sounds, labels)
 
     train_dataset = NoiseDataset(X_train, y_train, transform, target_transform)
-    train = DataLoader(train_dataset, **kwargs)
+    train = DataLoader(train_dataset, shuffle=True, **kwargs)
 
     test_dataset = NoiseDataset(X_test, y_test, transform, target_transform)
-    test = DataLoader(test_dataset, **kwargs)
+    test = DataLoader(test_dataset, shuffle=False, **kwargs)
 
     return train, test

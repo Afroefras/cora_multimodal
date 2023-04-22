@@ -9,7 +9,7 @@ class NoiseClassifier(LightningModule):
         super().__init__()
         self.conv1 = Conv1d(in_channels=1, out_channels=16, kernel_size=64, stride=2)
         self.pool = MaxPool1d(kernel_size=8)
-        self.fc1 = Linear(in_features=96, out_features=1)
+        self.fc1 = Linear(in_features=1536, out_features=1)
 
     def forward(self, x):
         x = self.conv1(x)
@@ -24,7 +24,8 @@ class NoiseClassifier(LightningModule):
         y_hat = self(x)
         loss_fn = BCEWithLogitsLoss()
         loss = loss_fn(y_hat, y)
-        self.log('train_loss', loss)
+        print(loss)
+        self.log("train_loss", loss)
         return loss
 
     def validation_step(self, batch, batch_idx):
