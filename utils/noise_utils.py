@@ -10,6 +10,7 @@ def get_sounds(records_dir: str, names_dir: str) -> tuple:
     records = torch_load(records_dir)
     sounds = records[:, :, 1:].clone()
     sounds.squeeze_()
+    sounds.unsqueeze_(dim=1)
 
     with open(names_dir, "rb") as f:
         names = load_pickle(f)
@@ -90,9 +91,15 @@ class NoiseDataset(Dataset):
         return sound, label
 
 
-def get_data_loader(
-    X: Tensor, y: Tensor, transform=None, target_transform=None, **kwargs
+def get_data_loaders(
+    sounds, labels, transform=None, target_transform=None, **kwargs
 ) -> DataLoader:
-    dataset = NoiseDataset(X, y, transform, target_transform)
-    data_loader = DataLoader(dataset, **kwargs)
-    return data_loader
+    X_train, y_train, X_test, y_test = train_test_split(sounds, labels)
+
+    train_dataset = NoiseDataset(X_train, y_train, transform, target_transform)
+    train = DataLoader(train_dataset, shuffle=True, **kwargs)
+
+    test_dataset = NoiseDataset(X_test, y_test, transform, target_transform)
+    test = DataLoader(test_dataset, shuffle=False, **kwargs)
+
+    return train, test
