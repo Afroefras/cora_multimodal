@@ -1,28 +1,40 @@
 from torch.optim import Adam
+from torch import relu, flatten
 from lightning.pytorch import LightningModule
-from torch.nn.functional import binary_cross_entropy
-from torch.nn import Sequential, Linear, Sigmoid, Conv1d
+from torch.nn import Conv1d, MaxPool1d, Linear, BCEWithLogitsLoss
 
-class NoiseModel(LightningModule):
-    def __init__(self, input_size, num_classes):
+
+class NoiseClassifier(LightningModule):
+    def __init__(self):
         super().__init__()
-        self.conv = Sequential(
-            # Conv1d(input_size, 256),
-            # Linear(256, num_classes),
-            Linear(num_classes, num_classes),
-            Sigmoid()
-        )
+        self.conv1 = Conv1d(in_channels=1, out_channels=16, kernel_size=64, stride=2)
+        self.pool = MaxPool1d(kernel_size=8)
+        self.fc1 = Linear(in_features=96, out_features=1)
+
+    def forward(self, x):
+        x = self.conv1(x)
+        x = relu(x)
+        x = self.pool(x)
+        x = flatten(x, start_dim=1)
+        x = self.fc1(x)
+        return x
 
     def training_step(self, batch, batch_idx):
-        # training_step defines the train loop.
-        # it is independent of forward
         x, y = batch
-        x = x.view(x.size(0), -1)
-        x_hat = self.conv(x)
-        loss = binary_cross_entropy(x_hat, y)
+        y_hat = self(x)
+        loss_fn = BCEWithLogitsLoss()
+        loss = loss_fn(y_hat, y)
+        self.log('train_loss', loss)
+        return loss
+
+    def validation_step(self, batch, batch_idx):
+        x, y = batch
+        y_hat = self(x)
+        loss_fn = BCEWithLogitsLoss()
+        loss = loss_fn(y_hat, y)
+        self.log("val_loss", loss)
         return loss
 
     def configure_optimizers(self):
         optimizer = Adam(self.parameters(), lr=1e-3)
         return optimizer
-
