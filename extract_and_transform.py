@@ -3,6 +3,7 @@ from utils.extract import ExtractData
 from utils.transform import split_records, save_records
 from pickle import HIGHEST_PROTOCOL, dump as save_pickle
 
+SUFFIX = '5sec'
 VERBOSE = True
 
 ed = ExtractData()
@@ -31,11 +32,11 @@ ed.same_shape(verbose=VERBOSE)
 save_records(
     records=ed.records,
     export_dir="data/tensors",
-    export_name="raw_records_5sec",
+    export_name=f"raw_records_{SUFFIX}",
     verbose=VERBOSE,
 )
 
-raw_records = torch_load("data/tensors/raw_records_5sec.pt")
+raw_records = torch_load(f"data/tensors/raw_records_{SUFFIX}.pt")
 
 resized, names_repeated = split_records(
     raw_records, ed.records_names, seconds=5, verbose=VERBOSE
@@ -44,9 +45,9 @@ resized, names_repeated = split_records(
 save_records(
     records=resized,
     export_dir="data/tensors",
-    export_name="resized_records_5sec",
+    export_name=f"resized_records_{SUFFIX}",
     verbose=VERBOSE,
 )
 
-with open("data/tensors/records_names_5sec.xz", "wb") as f:
+with open(f"data/tensors/records_names_{SUFFIX}.xz", "wb") as f:
     save_pickle(names_repeated, f, protocol=HIGHEST_PROTOCOL)
