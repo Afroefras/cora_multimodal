@@ -27,7 +27,7 @@ labels = sound_note_contains(sound_notes, contains="Good")
 train, test = get_data_loaders(
     sounds,
     labels,
-    batch_size=256,
+    batch_size=64,
     num_workers=1,
     transform=Spectrogram(),
 )
@@ -35,7 +35,6 @@ train, test = get_data_loaders(
 noise_classifier = NoiseClassifier()
 device = torch_device("cuda" if cuda.is_available() else "cpu")
 noise_classifier = noise_classifier.to(device)
-
 
 trainer = Trainer(limit_train_batches=100, max_epochs=10)
 

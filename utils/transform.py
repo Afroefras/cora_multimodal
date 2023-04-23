@@ -6,11 +6,10 @@ from torch import Tensor, stack, save as torch_save
 def split_records(
     records: Tensor, records_names: list, seconds: int, verbose: bool
 ) -> Tensor:
-
     seconds *= 8000
     to_stack = records.split(seconds, dim=1)
     new_duration = to_stack[0].shape[1]
-    
+
     to_reshape = stack(to_stack, dim=1)
     resized = to_reshape.view(-1, new_duration, 2)
 
