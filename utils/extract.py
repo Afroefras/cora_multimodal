@@ -61,7 +61,7 @@ class ExtractData:
             if verbose:
                 print(f"#{i+1}: {filename} imported")
 
-            if test and i > 7:
+            if test and i > 17:
                 break
 
     def same_shape(self, verbose: bool) -> None:

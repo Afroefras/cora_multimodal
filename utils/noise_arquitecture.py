@@ -8,7 +8,7 @@ from torch.nn import Conv1d, MaxPool1d, LazyLinear, BCEWithLogitsLoss
 class NoiseClassifier(LightningModule):
     def __init__(self):
         super().__init__()
-        self.conv1 = Conv1d(in_channels=1, out_channels=16, kernel_size=64, stride=2)
+        self.conv1 = Conv1d(in_channels=1, out_channels=256, kernel_size=8, stride=3)
         self.pool = MaxPool1d(kernel_size=8)
         self.fc1 = LazyLinear(out_features=1)
 
