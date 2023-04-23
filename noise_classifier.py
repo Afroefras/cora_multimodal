@@ -33,7 +33,7 @@ device = torch_device("cuda" if cuda.is_available() else "cpu")
 noise_classifier = noise_classifier.to(device)
 
 
-trainer = Trainer(limit_train_batches=100, max_epochs=1)
+trainer = Trainer(limit_train_batches=100, max_epochs=40)
 
 if __name__=="__main__":
     trainer.fit(model=noise_classifier, train_dataloaders=train, val_dataloaders=test)

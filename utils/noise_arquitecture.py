@@ -1,6 +1,7 @@
 from torch.optim import Adam
 from torch import relu, flatten
 from lightning.pytorch import LightningModule
+from torch.nn.functional import binary_cross_entropy
 from torch.nn import Conv1d, MaxPool1d, LazyLinear, BCEWithLogitsLoss
 
 
@@ -22,18 +23,27 @@ class NoiseClassifier(LightningModule):
     def training_step(self, batch, batch_idx):
         x, y = batch
         y_hat = self(x)
+
+        accuracy = binary_cross_entropy(y_hat, y)
+        self.log("train_accuracy", accuracy)
+
         loss_fn = BCEWithLogitsLoss()
         loss = loss_fn(y_hat, y)
-        print(loss)
         self.log("train_loss", loss)
+
         return loss
 
     def validation_step(self, batch, batch_idx):
         x, y = batch
         y_hat = self(x)
+
+        accuracy = binary_cross_entropy(y_hat, y)
+        self.log("val_accuracy", accuracy)
+
         loss_fn = BCEWithLogitsLoss()
         loss = loss_fn(y_hat, y)
         self.log("val_loss", loss)
+
         return loss
 
     def configure_optimizers(self):
