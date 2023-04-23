@@ -2,14 +2,14 @@ from torch.optim import Adam
 from torch import relu, flatten
 from lightning.pytorch import LightningModule
 from torch.nn.functional import binary_cross_entropy
-from torch.nn import Conv1d, MaxPool1d, LazyLinear, BCEWithLogitsLoss
+from torch.nn import Conv2d, MaxPool2d, LazyLinear, BCEWithLogitsLoss
 
 
 class NoiseClassifier(LightningModule):
     def __init__(self):
         super().__init__()
-        self.conv1 = Conv1d(in_channels=1, out_channels=256, kernel_size=8, stride=3)
-        self.pool = MaxPool1d(kernel_size=8)
+        self.conv1 = Conv2d(in_channels=1, out_channels=256, kernel_size=8, stride=3)
+        self.pool = MaxPool2d(kernel_size=8)
         self.fc1 = LazyLinear(out_features=1)
 
     def forward(self, x):
