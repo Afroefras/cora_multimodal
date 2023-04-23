@@ -1,7 +1,7 @@
 from torch.optim import Adam
 from torch import relu, flatten
 from lightning.pytorch import LightningModule
-from torch.nn import Conv1d, MaxPool1d, Linear, BCEWithLogitsLoss
+from torch.nn import Conv1d, MaxPool1d, LazyLinear, BCEWithLogitsLoss
 
 
 class NoiseClassifier(LightningModule):
@@ -9,7 +9,7 @@ class NoiseClassifier(LightningModule):
         super().__init__()
         self.conv1 = Conv1d(in_channels=1, out_channels=16, kernel_size=64, stride=2)
         self.pool = MaxPool1d(kernel_size=8)
-        self.fc1 = Linear(in_features=1536, out_features=1)
+        self.fc1 = LazyLinear(out_features=1)
 
     def forward(self, x):
         x = self.conv1(x)
