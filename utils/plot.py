@@ -1,7 +1,44 @@
-from wfdb import rdrecord, plot_wfdb
+from torch import Tensor
+from numpy.random import shuffle as np_shuffle
+from matplotlib.pyplot import subplots, show
 
-record = rdrecord("data/physionet.org/files/ephnogram/1.0.0/WFDB/ECGPCG0004")
-plot_wfdb(record=record)
+
+def plot_sounds(
+    sounds: Tensor, names: dict, labels: Tensor, n: int, shuffle: bool
+) -> None:
+    data_len = len(sounds)
+    idxs = list(range(data_len))
+
+    if shuffle:
+        np_shuffle(idxs)
+
+    to_show = idxs[:n]
+
+    sounds = sounds.squeeze()
+
+    fig, axs = subplots(1, n)
+    fig.set_figwidth(40)
+    fig.suptitle(f'{n} {"random" if shuffle else ""} records:')
+
+    for i in range(n):
+        idx = to_show[i]
+        name = names[idx]
+        sound = sounds[idx]
+        label = labels[idx].item()
+
+        label = "Good" if label > 0 else "Bad"
+
+        axs[i].plot(sound)
+        axs[i].set_title(name)
+        axs[i].set_xlabel(label, fontsize=18)
+
+    show()
+
+
+# from wfdb import rdrecord, plot_wfdb
+
+# record = rdrecord("data/physionet.org/files/ephnogram/1.0.0/WFDB/ECGPCG0004")
+# plot_wfdb(record=record)
 
 
 # import io
