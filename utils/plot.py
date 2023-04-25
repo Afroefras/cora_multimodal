@@ -4,7 +4,12 @@ from matplotlib.pyplot import subplots, show
 
 
 def plot_sounds(
-    sounds: Tensor, names: dict, labels: Tensor, n: int, shuffle: bool
+    sounds: Tensor,
+    names: dict,
+    labels: Tensor,
+    n: int,
+    spectrogram: bool,
+    shuffle: bool,
 ) -> None:
     data_len = len(sounds)
     idxs = list(range(data_len))
@@ -16,7 +21,9 @@ def plot_sounds(
 
     sounds = sounds.squeeze()
 
-    fig, axs = subplots(1, n)
+    n_rows = 2 if spectrogram else 1
+    fig, axs = subplots(n_rows, n)
+
     fig.set_figwidth(40)
     fig.suptitle(f'{n} {"random" if shuffle else ""} records:')
 
@@ -26,11 +33,12 @@ def plot_sounds(
         sound = sounds[idx]
         label = labels[idx].item()
 
-        label = "Good" if label > 0 else "Bad"
+        label = "Good" if label > 0.5 else "Bad"
 
-        axs[i].plot(sound)
-        axs[i].set_title(name)
-        axs[i].set_xlabel(label, fontsize=18)
+        axs[0, i].plot(sound)
+        axs[0, i].set_title(name)
+        axs[1, i].specgram(sound)
+        axs[1, i].set_xlabel(label, fontsize=18)
 
     show()
 
