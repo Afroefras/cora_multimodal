@@ -13,3 +13,4 @@ data/physionet.org/files/ephnogram/1.0.0/ECGPCGSpreadsheet.csv
 *.0
 *.ckpt
 *.yaml
+.DS_Store
